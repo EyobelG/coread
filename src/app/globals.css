@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reader links. Colors and cursor come from CSS variables set by lib/theme.ts. */
+.cr-link {
+  color: var(--cr-link, #2563eb);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: var(--cr-cursor, pointer);
+  transition: color 0.15s ease;
+}
+
+.cr-link:hover,
+.cr-link:focus-visible {
+  color: var(--cr-link-hover, #c026d3);
+}
+
+/* Reader themes. Components read these through var(--r-*) classes. */
+.reader-light {
+  --r-bg: #fafaf9;
+  --r-fg: #1c1917;
+  --r-surface: #ffffff;
+  --r-border: #e7e5e4;
+  --r-muted: #78716c;
+}
+
+.reader-sepia {
+  --r-bg: #f4ecd8;
+  --r-fg: #3b2f1e;
+  --r-surface: #fbf6e9;
+  --r-border: #e0d3b4;
+  --r-muted: #8a7656;
+}
+
+.reader-dark {
+  --r-bg: #16181d;
+  --r-fg: #e7e5e4;
+  --r-surface: #1f2228;
+  --r-border: #2f333b;
+  --r-muted: #9ca3af;
+}
+
+/* Paragraph currently read aloud. */
+.cr-speaking {
+  box-shadow: inset 4px 0 0 var(--cr-link, #2563eb);
+  border-radius: 2px;
+}
+
+/* Brief highlight when jumping to a chapter or link target. */
+.cr-flash {
+  animation: cr-flash 1.4s ease-out;
+}
+
+@keyframes cr-flash {
+  from {
+    background-color: #fde68a;
+  }
+  to {
+    background-color: transparent;
+  }
+}

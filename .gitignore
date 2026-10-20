@@ -1,0 +1,15 @@
+
+# secrets and CLI-generated env files
+.env*.local
+out/.env*
+out/.vercel
+.vercel
+
+# build output and local tooling
+.next/
+out/
+node_modules/
+.claude/
+.mcp.json
+*.tsbuildinfo
+.env.production

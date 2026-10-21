@@ -1,20 +1,20 @@
-# CoRead (Phase 1 slice)
+# CoRead — Shared Multiplayer Reading Rooms
 
-Implements the EPUB ingestion path from [ARCHITECTURE.md](../ARCHITECTURE.md), section 4.1, plus a smoke upload page.
+A browser-based reading platform where small groups read the same book together. Live: https://coread-beta.vercel.app
 
 ## What exists
 
-- `src/lib/epub/zipSafety.ts`: ZIP limits (entry count, uncompressed total, compression ratio), path checks, symlink rejection, mimetype check.
-- `src/lib/epub/blocks.ts`: XHTML to block list. Allowlisted block kinds, inline runs keep em/strong/code/link, whitespace collapsed, NFC normalized. Offsets index into `text`.
-- `src/lib/epub/parse.ts`: container, OPF, spine walk, global ordinals, per-block SHA-256, edition hash, DRM detection.
-- `src/app/api/books/route.ts`: upload endpoint with 10 MB Free cap and error codes.
-- `src/app/page.tsx`: upload smoke page.
+- **EPUB ingestion** (`src/lib/epub/`): `zipSafety.ts` enforces ZIP limits (entry count, uncompressed total, compression ratio), path checks, symlink rejection, mimetype check. `blocks.ts` converts XHTML into an allowlisted block list with NFC-normalized text and stable character offsets. `parse.ts` walks the container/OPF/spine, assigns global ordinals, hashes each block (SHA-256) and the edition, and detects DRM.
+- **Upload path**: `src/app/api/books/route.ts` (10 MB Free cap, typed error codes) and `src/app/page.tsx` (upload UI), plus a free-classics catalog (`src/lib/catalog.ts`) seeded from public-domain Gutenberg editions.
+- **Auth**: `src/components/AccountBar.tsx` — Supabase email magic-link sign-in (`signInWithOtp`), session state, sign-out.
+- **Reading rooms** (`src/lib/rooms.ts`, `src/app/rooms/`, `src/app/room/`, `src/app/join/`): create/list/join rooms via Supabase RPC (`create_room`, `join_room`), invite links (random token, only its SHA-256 hash stored), shared reading progress (`reading_progress`, high-water mark per user), and annotations gated to what the reader has actually reached (`ANCHOR_AHEAD_OF_PROGRESS`). Plan limits (`ROOM_LIMIT_REACHED`, `ROOM_FULL`) are enforced server-side via the RPC functions, not just in the UI.
+- **Reader UI**: `src/components/Reader.tsx`, `src/app/read/page.tsx`.
+- Access control is enforced by Postgres row-level security (RLS) on `rooms` / `reading_progress` / `annotations` — client calls always run as the signed-in user; the database decides what they can see.
 
 ## Not yet built
 
-- Supabase wiring (auth, storage, writes to `books` / `book_blocks`). Schema is in [schema.sql](../schema.sql).
-- Reader UI (virtualized blocks, selection to offset, highlights).
-- Rooms, progress, annotations, billing.
+- Billing (plan upgrade flow beyond the `ROOM_LIMIT_REACHED` prompt).
+- `schema.sql` (RLS policies, RPC functions) lives in a separate, unpublished setup repo — this repo is the application code only.
 
 ## Run
 
@@ -24,4 +24,6 @@ npm test
 npm run dev
 ```
 
-Status: written without being run. Install, typecheck, and test before relying on it.
+## Tests
+
+`npm test` runs the Vitest suite covering EPUB parsing, block extraction, link resolution, and catalog loading (`src/lib/epub/*.test.ts`).
